@@ -2,4 +2,3 @@ streamlit==0.88.0
 investpy==1.0.7
 datetime==4.3
 plotly==5.3.1
-python
