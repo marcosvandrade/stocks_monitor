@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import plotly.graph_objs as go
 from streamlit_autorefresh import st_autorefresh
 
-
 countries = ['Argentina', 'Australia', 'Austria', 'Bangladesh', 'Belgium',
              'Bosnia', 'Brazil', 'Bulgaria', 'Canada', 'China', 'Colombia',
              'Croatia', 'Czech Republic', 'Denmark', 'Dubai', 'Egypt',
