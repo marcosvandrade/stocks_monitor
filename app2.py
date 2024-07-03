@@ -3,7 +3,9 @@ import investpy as ip
 from datetime import datetime, timedelta
 import plotly.graph_objs as go
 from streamlit_autorefresh import st_autorefresh
+from collections.abc import Iterable
 
+# List of countries and intervals
 countries = [
     "Argentina",
     "Australia",
@@ -83,14 +85,14 @@ countries = [
     "Vietnam",
     "Zambia",
 ]
-
 intervals = ["Daily", "Weekly", "Monthly"]
 
 start_date = datetime.now() - timedelta(days=30)
 end_date = datetime.now()
 
 
-@st.cache(allow_output_mutation=True)
+# Caching functions to avoid redundant data fetching
+@st.cache_data()
 def consultar_acao(stock, country, from_date, to_date, interval):
     df = ip.get_stock_historical_data(
         stock=stock,
@@ -102,7 +104,7 @@ def consultar_acao(stock, country, from_date, to_date, interval):
     return df
 
 
-@st.cache(allow_output_mutation=True)
+@st.cache_data()
 def consultar_crypto(crypto, from_date, to_date, interval):
     df = ip.get_crypto_historical_data(
         crypto=crypto, from_date=from_date, to_date=to_date, interval=interval
@@ -110,10 +112,12 @@ def consultar_crypto(crypto, from_date, to_date, interval):
     return df
 
 
+# Formatting date
 def format_date(dt, format="%d/%m/%Y"):
     return dt.strftime(format)
 
 
+# Plotting candlestick chart
 def plotCandleStick(df, acao="ticket"):
     trace1 = {
         "x": df.index,
@@ -133,7 +137,7 @@ def plotCandleStick(df, acao="ticket"):
     return fig
 
 
-# CRIANDO UMA BARRA LATERAL
+# Creating the sidebar
 barra_lateral = st.sidebar.empty()
 country_select = st.sidebar.selectbox("Select country:", countries)
 stocks = ip.get_stocks_list(country=country_select)
@@ -145,24 +149,18 @@ to_date = st.sidebar.date_input("End Date:", end_date)
 interval_select = st.sidebar.selectbox("Select the range:", intervals)
 carregar_dados = st.sidebar.checkbox("Load Data")
 
-
 grafico_line = st.empty()
 grafico_candle = st.empty()
 
-# elementos centrais da página
+# Central page elements
 st.title("Stock Monitor")
-
 st.header("Stocks")
-
 st.subheader("Graphical visualization")
 
-
+# Error handling for date input
 if from_date > to_date:
     st.sidebar.error("Data de ínicio maior do que data final")
 else:
-    # df = consultar_acao(stock_select, country_select, format_date(
-    #     from_date), format_date(to_date), interval_select)
-
     df = consultar_crypto(
         crypto_select, format_date(from_date), format_date(to_date), interval_select
     )
@@ -173,17 +171,12 @@ else:
         if carregar_dados:
             st.subheader("Dados")
             dados = st.dataframe(df)
-            stock_select = st.sidebar.selectbox
     except Exception as e:
         st.error(e)
 
-
-# Run the autorefresh about every 2000 milliseconds (2 seconds) and stop
-# after it's been refreshed 100 times.
+# Auto-refresh functionality
 count = st_autorefresh(interval=5000, limit=10000, key="fizzbuzzcounter")
 
-# The function returns a counter for number of refreshes. This allows the
-# ability to make special requests at different intervals based on the count
 if count == 0:
     st.write("Count is zero")
 elif count % 3 == 0 and count % 5 == 0:
